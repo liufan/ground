@@ -4,4 +4,4 @@ from ground.tool.dependencies import pip_install, yum_install
 
 
 def install_dependencies():
-    pip_install('Flask')
+    pip_install('flask')

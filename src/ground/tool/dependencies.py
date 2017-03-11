@@ -3,6 +3,7 @@ from __future__ import unicode_literals, print_function, division
 import pip
 import imp
 
+
 def yum_install(package):
     run_local('sudo yum install {}'.format(package))
 
