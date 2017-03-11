@@ -6,4 +6,5 @@ The tools include:
 * database migration tool
 * remote deployment script
 * in-process event publication/subscription
+* project dependencies declaration
 
