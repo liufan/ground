@@ -4,6 +4,9 @@ from ground.tool.log import info
 from ground.tool.db_script import run_script
 
 
+database_resource_dir = 'demo/db'
+
+
 def init_db():
     create_schema()
 
@@ -11,4 +14,11 @@ def init_db():
 def create_schema():
     info('creating schema ...')
 
-    run_script('demo/db/schema.sql')
+    run_script('{}/schema.sql'.format(database_resource_dir))
+
+
+def migrate():
+    from ground.tool.migrate import migrate as do_migrate
+    do_migrate(database_resource_dir)
+
+

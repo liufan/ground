@@ -9,11 +9,19 @@ config_file_name = None
 
 
 class DatabaseCredential:
-    def __init__(self, username, password, instance, unix_socket=None):
+    def __init__(self, username, password, instance, host='127.0.0.1', port=3306, unix_socket=None):
         self.username = username
         self.password = password
         self.instance = instance
+        self.host = host
+        if isinstance(port, basestring):
+            port = int(port)
+        self.port = port
+
         self.unix_socket = unix_socket
+
+    def __repr__(self):
+        return DatabaseCredential.__dict__.__repr__()
 
 
 db_credential = None
@@ -44,8 +52,11 @@ def db():
     global db_credential
     if not db_credential:
         db_credential = DatabaseCredential(
-            config().get('database', 'username'),
-            config().get('database', 'password'),
-            config().get('database', 'instance'),
+            username=config().get('database', 'username'),
+            password=config().get('database', 'password'),
+            instance=config().get('database', 'instance'),
+            host=config().get('database', 'host'),
+            port=config().get('database', 'port'),
+            unix_socket=config().get('database', 'unix_socket'),
         )
     return db_credential

@@ -2,12 +2,24 @@
 from __future__ import unicode_literals, print_function, division
 import os
 import sys
-from dbi import from_db
+from dbi import from_db, transactional
 from log import *
 from db_script import run_script
 
-def migrate():
-    versions = load_versions()
+migration_record_table_name = 'db_migration'
+
+
+@transactional
+def ensure_migration_record_table_exist():
+    if len(from_db().list("show tables like '{}'".format(migration_record_table_name))) == 0:
+        info('init db migration record table...')
+        from_db().execute('CREATE TABLE db_migration (latest_version INT)')
+        from_db().insert('db_migration', latest_version=0)
+
+
+def migrate(script_dir):
+    ensure_migration_record_table_exist()
+    versions = load_versions(script_dir)
     if len(versions) == 0:
         warn('No migration script found!')
         sys.exit(0)
@@ -28,6 +40,7 @@ def migrate():
     warn('database migration finished, from {} to {}'.format(latest_version, version_numbers[-1]))
 
 
+@transactional
 def update_database_version(version):
     from_db().execute('update db_migration set latest_version=%(version)s', version=version)
 
@@ -36,10 +49,10 @@ def get_database_latest_version():
     return from_db().get_scalar('select latest_version from db_migration')
 
 
-def load_versions():
+def load_versions(script_dir):
     versions = {}
-    for file_name in os.listdir('db'):
+    for file_name in os.listdir(script_dir):
         if '-' in file_name and file_name.endswith('.sql'):
             version = int(file_name.split('-')[0])
-            versions[version] = 'db/{}'.format(file_name)
+            versions[version] = '{}/{}'.format(script_dir, file_name)
     return versions

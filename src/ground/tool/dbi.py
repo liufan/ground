@@ -6,7 +6,7 @@ from contextlib import contextmanager, closing
 
 import MySQLdb as mysql
 import config
-from tool.collection import *
+from collection import *
 
 
 LOGGER = logging.getLogger(__name__)
@@ -97,16 +97,28 @@ class DatabaseInterface:
             return cursor.rowcount
 
     def execute(self, sql, **kwargs):
-        return self._execute(sql, **kwargs)
+        result=self._execute(sql, **kwargs)
+        return result
 
     def connect(self):
-        self.conn = mysql.connect(
-            unix_socket=self.options.unix_socket,
-            user=self.options.username,
-            passwd=self.options.password,
-            db=self.options.database,
-            charset='utf8'
-        )
+        if self.options.unix_socket:
+            self.conn = mysql.connect(
+                unix_socket=self.options.unix_socket,
+                user=self.options.username,
+                passwd=self.options.password,
+                db=self.options.database,
+                charset='utf8'
+            )
+        else:
+            self.conn = mysql.connect(
+                host=self.options.host,
+                port=self.options.port,
+                user=self.options.username,
+                passwd=self.options.password,
+                db=self.options.database,
+                charset='utf8'
+            )
+        # self.conn.autocommit(True)
 
     def _execute(self, sql, **kwargs):
         self.conn.ping(True)
@@ -282,13 +294,14 @@ instance = []
 
 def from_db():
     if len(instance) == 0:
-        cfg = config.config()
+        cfg = config.db()
         db = DatabaseInterface(objectify({
-            'unix_socket': cfg.get('database', 'unix_socket'),
-            'username': cfg.get('database', 'username'),
-            'password': cfg.get('database', 'password'),
-            'database': cfg.get('database', 'instance')
-
+            'unix_socket': cfg.unix_socket,
+            'username': cfg.username,
+            'password': cfg.password,
+            'database': cfg.instance,
+            'host': cfg.host,
+            'port': cfg.port
         }))
         db.connect()
         instance.append(db)
