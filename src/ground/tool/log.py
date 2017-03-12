@@ -1,5 +1,8 @@
+import inspect
+
+
 def info(message):
-    print(green('[info] {}'.format(message)))
+    print(green('[info]{}: {}'.format(get_caller(),message)))
 
 
 def warn(message):
@@ -20,6 +23,13 @@ def _wrap_with(code):
     return inner
 
 
+def get_caller():
+    return inspect.currentframe().f_back.f_back.f_code.co_filename
+
+
 red = _wrap_with('31')
 green = _wrap_with('32')
 yellow = _wrap_with('33')
+
+if __name__=='__main__':
+    info('should tell me the caller')

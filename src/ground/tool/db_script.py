@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, division
 from fabric.api import local
-from log import *
+from config import db
 
 
-def run_script(cfg, script_with_path):
+def run_script(script_with_path):
     local('mysql --user={} --password={} --database={} < {}'.format(
-        cfg.get('database','username'),
-        cfg.get('database','password'),
-        cfg.get('database','instance'),
-        script_with_path
+        db().username, db().password, db().instance, script_with_path
     ))
-
